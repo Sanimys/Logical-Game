@@ -16,7 +16,6 @@ void settings() {
   player = new Player();
   level = 1;
   level1 = new Level_1();
-  noLoop();
 }
 
 void setup() {

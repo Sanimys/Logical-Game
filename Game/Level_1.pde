@@ -1,12 +1,12 @@
 class Level_1 {
   Cell cells[][];
   PVector pos_ini = new PVector(100, 100);
-  int[] startCell = {2, 2};
+  int[] startCell = {3, 3};
   float[] startPos = new float[2];
   
   float radius = 50;
-  int nbH = 5;
-  int nbV = 4;
+  int nbLines = 4;
+  int nbCols = 5;
 
   void display() {
     for (int i = 0; i < cells.length; i++) {
@@ -17,7 +17,7 @@ class Level_1 {
   }
 
   void setup() {
-    cells = new Cell[nbV][nbH];
+    cells = new Cell[nbLines][nbCols];
     float posX = pos_ini.x;
     float posY = pos_ini.y;
     
@@ -40,5 +40,10 @@ class Level_1 {
     Cell tmp = cells[(int)startCell[0] - 1][(int)startCell[1] - 1];
     startPos[0] = tmp.position.x;
     startPos[1] = tmp.position.y;
+  }
+  
+  PVector get_position(int line, int col) {
+    PVector pos = new PVector(cells[line-1][col-1].position.x, cells[line-1][col-1].position.y);
+    return pos;
   }
 }
