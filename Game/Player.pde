@@ -11,12 +11,15 @@ class Player {
   boolean evenLine;
 
   void display() {
+    if (!move) {
+      display_static();
+    } else {
+      move();
+    }
+    //println(position.x + " " + position.y);
     gameSurface.fill(couleur);
     gameSurface.stroke(0);
     gameSurface.ellipse(position.x, position.y, radius, radius);
-    if (!move) {
-      display_static();
-    }
   }
 
   void setup() {
@@ -30,18 +33,18 @@ class Player {
   }
 
   void display_static() {
-    gameSurface.fill(255);
-    gameSurface.stroke(0);
-    for (float ang = -PI/3; ang < TWO_PI - PI/3; ang += angle) {
-      float x1 = position.x + cos(ang) * (40);
-      float y1 = position.y + sin(ang) * (40);
-      float x2 = position.x + cos(ang + PI/8) * (28);
-      float y2 = position.y + sin(ang + PI/8) * (28);
-      float x3 = position.x + cos(ang - PI/8) * (28);
-      float y3 = position.y + sin(ang - PI/8) * (28);
+    //gameSurface.fill(255);
+    //gameSurface.stroke(0);
+    //for (float ang = -PI/3; ang < TWO_PI - PI/3; ang += angle) {
+    //  float x1 = position.x + cos(ang) * (40);
+    //  float y1 = position.y + sin(ang) * (40);
+    //  float x2 = position.x + cos(ang + PI/8) * (28);
+    //  float y2 = position.y + sin(ang + PI/8) * (28);
+    //  float x3 = position.x + cos(ang - PI/8) * (28);
+    //  float y3 = position.y + sin(ang - PI/8) * (28);
 
-      gameSurface.triangle(x1, y1, x2, y2, x3, y3);
-    }
+    //  gameSurface.triangle(x1, y1, x2, y2, x3, y3);
+    //}
     
     //gameSurface.stroke(200, 40, 40);
     //for (float ang = -PI/2; ang < TWO_PI - PI/2; ang += angle) {
@@ -52,7 +55,7 @@ class Player {
     //}
   }
 
-  void move(DIRECTION dir) {
+  void change_direction(DIRECTION dir) {
     evenLine = actualCell[0] % 2 == 0;
 
     switch (dir) {
@@ -83,7 +86,20 @@ class Player {
       break;
     }
     destination = level1.get_position(actualCell[0], actualCell[1]);
-      
-      position = destination;
+    move = true;
+  }
+  
+  void move() {
+    println(" --------- " + (destination.x - position.x) + " " + (destination.y - position.y));
+    float diffX = destination.x - position.x;
+    float diffY = destination.y - position.y;
+    float interX = diffX <= 5 || diffY <= 5 ? diffX/5*speed : diffX/100*speed;
+    float interY = diffX <= 5 || diffY <= 5 ? diffY/5*speed : diffY/100*speed;
+    position.x = interX + position.x;
+    position.y = interY + position.y;
+    
+    println(position.x + " " + position.y);
+    
+    if(floor(position.x) == floor(destination.x) && floor(position.y) == floor(position.y)) move = false;
   }
 }
