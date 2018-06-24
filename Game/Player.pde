@@ -36,7 +36,7 @@ class Player {
       move(direction);
     } else {
       println("chelou");
-      if(atDestination) {
+      if (atDestination) {
         check_cell(direction);
         move = canMove;
       }
@@ -92,27 +92,29 @@ class Player {
   void check_cell(DIRECTION dir) {
     int line = actualCell[0];
     int col = actualCell[1];
+    int maxL = level1.nbLines;
+    int maxC = level1.nbCols;
     evenLine = line % 2 == 0;
     println(evenLine);
 
     switch (dir) {
     case NE:
-      canMove = (line > 1 && col < level1.nbCols) || evenLine;
+      canMove = (line > 1 && col < maxC) || (line != 0 && evenLine);
       break;
     case E:
-      canMove = col < level1.nbCols;
+      canMove = col < maxC;
       break;
     case SE:
-      canMove = (line < level1.nbLines && col < level1.nbCols) || evenLine;
+      canMove = (line < maxL && col < maxC) || (line != maxL && evenLine);
       break;
     case SW :
-      canMove = (line < level1.nbLines && col > 1)  || !evenLine;
+      canMove = (line < maxL && col > 1)  || (line != maxL && !evenLine);
       break;
     case W :
       canMove = actualCell[1] > 1;
       break;
     case NW :
-      canMove = (line > 1 && col > 1)  || (!evenLine && line != 1);
+      canMove = (line > 1 && col > 1)  || (line != 1 && !evenLine);
       break;
     default :
       println("ERROR : Direction doesn't exist ! ");
@@ -129,46 +131,34 @@ class Player {
 
     switch (dir) {
     case NE:
-      if ((destCell[0] > 1 && destCell[1] < level1.nbCols) || evenLine) {
-        destCell[0]--;
-        destCell[1] = evenLine ? destCell[1] : destCell[1]+1;
-      } else canMove = false;
+      destCell[0]--;
+      destCell[1] = evenLine ? destCell[1] : destCell[1]+1;
       break;
     case E:
-      if (destCell[1] < level1.nbCols) destCell[1]++;
-      else canMove = false;
+      destCell[1]++;
       break;
     case SE:
-      if (destCell[0] < level1.nbLines && destCell[1] < level1.nbCols) {
-        destCell[0]++;
-        destCell[1] = evenLine ? destCell[1] : destCell[1]+1;
-      } else canMove = false;
+      destCell[0]++;
+      destCell[1] = evenLine ? destCell[1] : destCell[1]+1;
       break;
     case SW :
-      if (destCell[0] < level1.nbLines && destCell[1] > 1) {
-        destCell[0]++;
-        destCell[1] = evenLine ? destCell[1]-1 : destCell[1];
-      } else canMove = false;
+      destCell[0]++;
+      destCell[1] = evenLine ? destCell[1]-1 : destCell[1];
       break;
     case W :
-      if (destCell[1] > 1) destCell[1]--;
-      else canMove = false;
+      destCell[1]--;
       break;
     case NW :
-      if (destCell[0] > 1 && destCell[1] > 1) {
-        destCell[0]--;
-        destCell[1] = evenLine ? destCell[1]-1 : destCell[1];
-      } else canMove = false;
+      destCell[0]--;
+      destCell[1] = evenLine ? destCell[1]-1 : destCell[1];
       break;
     default :
       println("ERROR : Direction doesn't exist ! ");
       break;
     }
 
-    if (canMove) {
-      move = true;
-      direction = dir;
-    }
+    move = true;
+    direction = dir;
 
     PVector pos = level1.get_position(destCell[0], destCell[1]);
     return pos;

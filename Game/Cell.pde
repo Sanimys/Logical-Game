@@ -23,15 +23,23 @@ class Cell {
   void setup() {
     cell = createShape();
     cell.beginShape();
-    cell.stroke(170);
+    cell.stroke(230);
     cell.strokeWeight(8);
     cell.fill(couleur);
+    
+    int count = 0;
     
     // Hexagon
     for (float ang = -PI/2; ang < TWO_PI - PI/2; ang += angle) {
       float sx = position.x + cos(ang) * radius;
       float sy = position.y + sin(ang) * radius;
+      cell.stroke(170);
+      if(count < 0) {
+        cell.stroke(0);
+      }
       cell.vertex(sx, sy);
+      
+      count++;
     }
     cell.endShape(CLOSE);
   }
