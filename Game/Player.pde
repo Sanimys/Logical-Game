@@ -1,22 +1,49 @@
 class Player {
   PVector position;
   PVector destination;
+  DIRECTION direction;
+
   int[] actualCell = new int[2];
-  float speed = 3;
+  int[] destCell = new int[2];
+  float speed = 10;
 
   float radius = 25;
   color couleur = color(50, 50, 150);
 
   boolean move = false;
   boolean evenLine;
+  boolean canMove = false;
+  boolean atDestination = true;
 
   void display() {
-    if (!move) {
-      display_static();
-    } else {
-      move();
-    }
+    //if(canMove) println(canMove);
+    //println(actualCell[0] + " " + actualCell[1]);
     //println(position.x + " " + position.y);
+
+    if (canMove && atDestination) {
+      change_direction(direction);
+    }
+
+    atDestination = check_dest();
+
+    println(" -- " + atDestination + canMove + move);
+    if (!move) {
+      println("static");
+      display_static();
+    } else if (canMove && !atDestination) {
+      println("move");
+      check_cell(direction);
+      move(direction);
+    } else {
+      println("chelou");
+      if(atDestination) {
+        check_cell(direction);
+        move = canMove;
+      }
+      actualCell[0] = destCell[0];
+      actualCell[1] = destCell[1];
+    }
+
     gameSurface.fill(couleur);
     gameSurface.stroke(0);
     gameSurface.ellipse(position.x, position.y, radius, radius);
@@ -45,61 +72,156 @@ class Player {
 
     //  gameSurface.triangle(x1, y1, x2, y2, x3, y3);
     //}
-    
+
     //gameSurface.stroke(200, 40, 40);
     //for (float ang = -PI/2; ang < TWO_PI - PI/2; ang += angle) {
     //  float sx = position.x + cos(ang) * 10000;
     //  float sy = position.y + sin(ang) * 10000;
-      
+
     //  gameSurface.line(position.x, position.y, sx, sy);
     //}
   }
 
   void change_direction(DIRECTION dir) {
-    evenLine = actualCell[0] % 2 == 0;
+    move = true;
+    direction = dir;
+    check_cell(direction);
+    destination = canMove? move_cell(direction) : position;
+  }
+
+  void check_cell(DIRECTION dir) {
+    int line = actualCell[0];
+    int col = actualCell[1];
+    evenLine = line % 2 == 0;
+    println(evenLine);
 
     switch (dir) {
     case NE:
-      actualCell[0]--;
-      actualCell[1] = evenLine ? actualCell[1] : actualCell[1]+1;
+      canMove = (line > 1 && col < level1.nbCols) || evenLine;
       break;
     case E:
-      actualCell[1]++;
+      canMove = col < level1.nbCols;
       break;
     case SE:
-      actualCell[0]++;
-      actualCell[1] = evenLine ? actualCell[1] : actualCell[1]+1;
+      canMove = (line < level1.nbLines && col < level1.nbCols) || evenLine;
       break;
     case SW :
-      actualCell[0]++;
-      actualCell[1] = evenLine ? actualCell[1]-1 : actualCell[1];
+      canMove = (line < level1.nbLines && col > 1)  || !evenLine;
       break;
     case W :
-      actualCell[1]--;
+      canMove = actualCell[1] > 1;
       break;
     case NW :
-      actualCell[0]--;
-      actualCell[1] = evenLine ? actualCell[1]-1 : actualCell[1];
+      canMove = (line > 1 && col > 1)  || (!evenLine && line != 1);
       break;
     default :
       println("ERROR : Direction doesn't exist ! ");
       break;
     }
-    destination = level1.get_position(actualCell[0], actualCell[1]);
-    move = true;
+
+    direction = dir;
   }
-  
-  void move() {
-    println(" --------- " + (destination.x - position.x) + " " + (destination.y - position.y));
-    float diffX = destination.x - position.x;
-    float diffY = destination.y - position.y;
-    float interX = diffX <= 5 || diffY <= 5 ? diffX/5*speed : diffX/100*speed;
-    float interY = diffX <= 5 || diffY <= 5 ? diffY/5*speed : diffY/100*speed;
-    position.x = interX + position.x;
-    position.y = interY + position.y;
-    
-    println(position.x + " " + position.y);
-    
-    if(floor(position.x) == floor(destination.x) && floor(position.y) == floor(position.y)) move = false;
+
+  PVector move_cell(DIRECTION dir) {
+    destCell[0] = actualCell[0];
+    destCell[1] = actualCell[1];
+    evenLine = actualCell[0] % 2 == 0;
+
+    switch (dir) {
+    case NE:
+      if ((destCell[0] > 1 && destCell[1] < level1.nbCols) || evenLine) {
+        destCell[0]--;
+        destCell[1] = evenLine ? destCell[1] : destCell[1]+1;
+      } else canMove = false;
+      break;
+    case E:
+      if (destCell[1] < level1.nbCols) destCell[1]++;
+      else canMove = false;
+      break;
+    case SE:
+      if (destCell[0] < level1.nbLines && destCell[1] < level1.nbCols) {
+        destCell[0]++;
+        destCell[1] = evenLine ? destCell[1] : destCell[1]+1;
+      } else canMove = false;
+      break;
+    case SW :
+      if (destCell[0] < level1.nbLines && destCell[1] > 1) {
+        destCell[0]++;
+        destCell[1] = evenLine ? destCell[1]-1 : destCell[1];
+      } else canMove = false;
+      break;
+    case W :
+      if (destCell[1] > 1) destCell[1]--;
+      else canMove = false;
+      break;
+    case NW :
+      if (destCell[0] > 1 && destCell[1] > 1) {
+        destCell[0]--;
+        destCell[1] = evenLine ? destCell[1]-1 : destCell[1];
+      } else canMove = false;
+      break;
+    default :
+      println("ERROR : Direction doesn't exist ! ");
+      break;
+    }
+
+    if (canMove) {
+      move = true;
+      direction = dir;
+    }
+
+    PVector pos = level1.get_position(destCell[0], destCell[1]);
+    return pos;
+  }
+
+  void move(DIRECTION dir) { 
+    float intX = level1.interX * speed;
+    float intY = level1.interY * speed;
+
+    switch (dir) {
+    case NE:
+      position.x = position.x + intX;
+      position.y = position.y - intY;
+      break;
+    case E:
+      position.x = intX + position.x + intY;
+      break;
+    case SE:
+      position.x = position.x + intX;
+      position.y = position.y + intY;
+      break;
+    case SW :
+      position.x = position.x - intX;
+      position.y = position.y + intY;
+      break;
+    case W :
+      position.x = position.x - intY - intX;
+      break;
+    case NW :
+      position.x = position.x - intX;
+      position.y = position.y - intY;
+      break;
+    default :
+      println("ERROR : Direction doesn't exist ! ");
+      break;
+    }
+
+    level1.check_move(position.x, position.y);
+  }
+
+  boolean check_dest() {
+    boolean arrived = false;
+    float epsilon = 1;
+
+    println("->" + position.x + " " + position.y);
+    println("->" + destination.x + " " + destination.y);
+
+    if (position.x >= destination.x - epsilon && position.x <= destination.x + epsilon) {
+      if (position.y >= destination.y - epsilon && position.y <= destination.y + epsilon) {
+        arrived = true;
+      }
+    } 
+
+    return arrived;
   }
 }
